@@ -1,0 +1,1 @@
+"""FastAPI backend for the retail pricing project."""

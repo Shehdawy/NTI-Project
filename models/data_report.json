@@ -1,0 +1,88 @@
+{
+  "dataset": "data\\processed\\sales_data.csv",
+  "rows": 5000,
+  "columns": 15,
+  "column_names": [
+    "product_id",
+    "product_category",
+    "date",
+    "cost_price",
+    "selling_price",
+    "competitor_price",
+    "units_sold",
+    "inventory",
+    "promotion",
+    "season",
+    "day_of_week",
+    "customer_rating",
+    "demand",
+    "revenue",
+    "profit"
+  ],
+  "data_types": {
+    "product_id": "str",
+    "product_category": "str",
+    "date": "datetime64[ns]",
+    "cost_price": "float64",
+    "selling_price": "float64",
+    "competitor_price": "float64",
+    "units_sold": "int64",
+    "inventory": "int64",
+    "promotion": "int64",
+    "season": "str",
+    "day_of_week": "str",
+    "customer_rating": "float64",
+    "demand": "int64",
+    "revenue": "float64",
+    "profit": "float64"
+  },
+  "missing_values": {
+    "product_id": 0,
+    "product_category": 0,
+    "date": 0,
+    "cost_price": 0,
+    "selling_price": 0,
+    "competitor_price": 0,
+    "units_sold": 0,
+    "inventory": 0,
+    "promotion": 0,
+    "season": 0,
+    "day_of_week": 0,
+    "customer_rating": 0,
+    "demand": 0,
+    "revenue": 0,
+    "profit": 0
+  },
+  "duplicate_rows": 0,
+  "date_range": {
+    "start": "2023-01-01 00:00:00",
+    "end": "2024-12-31 00:00:00"
+  },
+  "numeric_columns": [
+    "cost_price",
+    "selling_price",
+    "competitor_price",
+    "units_sold",
+    "inventory",
+    "promotion",
+    "customer_rating",
+    "demand",
+    "revenue",
+    "profit"
+  ],
+  "categorical_columns": [
+    "product_id",
+    "product_category",
+    "date",
+    "season",
+    "day_of_week"
+  ],
+  "target": "units_sold",
+  "real_pricing_fields": [
+    "selling_price",
+    "cost_price",
+    "competitor_price",
+    "revenue",
+    "profit"
+  ]
+}

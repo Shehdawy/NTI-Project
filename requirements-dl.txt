@@ -1,0 +1,2 @@
+# Optional experiment only; not required by the Streamlit deployment.
+tensorflow-cpu>=2.15

@@ -1,0 +1,23 @@
+{
+  "best_model": "Gradient Boosting",
+  "rows": 5000,
+  "features": [
+    "product_category",
+    "cost_price",
+    "selling_price",
+    "competitor_price",
+    "inventory",
+    "promotion",
+    "season",
+    "day_of_week",
+    "customer_rating",
+    "month",
+    "weekend",
+    "promotion_flag",
+    "price_difference_from_competitor",
+    "price_ratio_to_competitor"
+  ],
+  "data_start": "2023-01-01 00:00:00",
+  "data_end": "2024-12-31 00:00:00",
+  "split": "chronological 80/20"
+}
