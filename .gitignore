@@ -13,17 +13,18 @@ Thumbs.db
 *.tmp
 *.bak
 
-# M5 source data and prepared local data
-data/*.csv
-data/**/*.csv
+# M5 raw source data (large, download separately per data/README.md)
+data/raw/*.csv
 data/*.zip
+
+# Prepared dataset and trained model ARE committed (needed for Streamlit Cloud
+# to serve the app without retraining) via the negations below.
 
 # Generated model and evaluation artifacts
 models/*.pkl
-models/*.joblib
 models/*.keras
-models/*.csv
-models/*.json
 reports/*
 screenshots/*
 !screenshots/README.md
+!data/processed/prepared_sales_data.csv
+!models/demand_model.joblib
