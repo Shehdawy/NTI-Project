@@ -1,5 +1,4 @@
 {
-  "status": "trained",
-  "mae": 4.305380821228027,
-  "rmse": 5.408814279638476
+  "status": "skipped",
+  "reason": "TensorFlow is not installed. Install tensorflow-cpu to run the optional experiment."
 }

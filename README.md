@@ -1,68 +1,211 @@
-# PricePilot AI — Retail Price Recommendation System
+# AI-Based Retail Price Recommendation System
 
-PricePilot AI predicts product demand and simulates prices to recommend a reasonable selling price. The model predicts expected units sold; business logic then compares candidate prices by expected revenue and profit. It does not claim to discover a mathematically perfect or autonomous price.
+## 1. Business Problem
 
-## Business Objective
+Retailers must balance demand and margin. A price that is too high can reduce sales, while a price that is too low can reduce revenue and gross profit. This project provides a repeatable decision-support workflow for reviewing candidate prices.
 
-Help a small business balance demand and margin using historical sales, product cost, competitor price, inventory, promotion, category, season, and customer rating.
+## 2. Proposed Solution
 
-## Dataset
+The system has two separate responsibilities:
 
-The supplied dataset is `data/processed/sales_data.csv`, with 5,000 rows and 15 columns. It contains `product_id`, `product_category`, `date`, `cost_price`, `selling_price`, `competitor_price`, `units_sold`, `inventory`, `promotion`, `season`, `day_of_week`, `customer_rating`, `demand`, `revenue`, and `profit`. The project does not invent these fields. A machine-readable inspection is saved in `models/data_report.json` after training.
+- **Prediction:** the ML model predicts expected units sold from historical retail data.
+- **Decision logic:** the pricing engine simulates candidate prices and selects a recommended price according to a business objective.
 
-The data period is 2023-01-01 through 2024-12-31. Because the data ends before the current date, this application demonstrates the historical-data methodology and does not claim to predict current market prices.
+The system does not claim to predict a perfect price or current Walmart prices.
 
-## Project Architecture
+## 3. Dataset
+
+The project uses the historical M5 Walmart retail forecasting dataset. It does not represent current 2026 market conditions. Download these files from the official M5 competition source and place them in `data/raw/`:
+
+- `sales_train_evaluation.csv`
+- `sell_prices.csv`
+- `calendar.csv`
+
+The raw CSV files are ignored by Git because they are too large for a normal repository. The loader uses a deterministic product sample and the most recent available evaluation period.
+
+M5 does not provide true cost, competitor price, inventory, or customer rating. The project therefore uses documented scenario assumptions for the prepared data and UI defaults:
+
+- Cost price: 65% of selling price
+- Competitor price: 103% of selling price
+- Inventory: 100 units
+- Customer rating: 4.1
+
+These assumptions are used for pricing calculations and are not learned demand features.
+
+## 4. EDA and Data Preparation
+
+`model_training.py` loads and reshapes the M5 files, cleans invalid rows, creates the prepared dataset, and generates a basic EDA image in `reports/`.
+
+The prepared data contains date, category, selling price, promotion, season, weekday, observed units sold, and derived pricing fields. Missing required values are removed before the chronological split.
+
+## 5. Machine Learning
+
+The target is `units_sold`, interpreted as an observed-sales demand proxy. The trained features are:
+
+- Product category
+- Selling price
+- Promotion
+- Season
+- Day of week
+- Month
+- Weekend flag
+
+The project compares:
+
+- Mean-demand baseline
+- Linear Regression
+- Random Forest
+- Gradient Boosting
+
+The final holdout is chronological and split at a date boundary so records from the same day cannot appear in both train and test. The selected model is serialized to `models/demand_model.joblib`.
+
+## 6. Deep Learning
+
+`src/deep_learning_model.py` contains an optional small Keras network for comparison. TensorFlow is not required by the deployed application. When installed through `requirements-dl.txt`, the training script can create an optional Keras artifact and comparison result.
+
+## 7. Pricing Simulation
+
+For each request, the pricing engine tests candidate prices within current-price and competitor-aware limits. For each candidate it:
+
+1. Predicts expected units sold.
+2. Caps expected units by the requested inventory.
+3. Calculates expected revenue.
+4. Calculates expected gross profit using the supplied cost assumption.
+5. Calculates a normalized balanced score when requested.
+
+The model predicts units sold; the pricing engine makes the price decision.
+
+## 8. Business Objectives
+
+The user can select:
+
+- **Maximize revenue**
+- **Maximize profit**
+- **Balanced**, using normalized revenue and profit scores
+
+These are scenario estimates, not guarantees of future sales.
+
+## 9. FastAPI
+
+The API is implemented in `backend/` and exposes:
+
+- `GET /`
+- `GET /api/v1/health`
+- `GET /api/v1/model/info`
+- `POST /api/v1/predict-demand`
+- `POST /api/v1/recommend-price`
+
+Interactive API documentation is available at `/docs` when FastAPI is running.
+
+## 10. Streamlit
+
+`streamlit_app.py` provides the interactive decision dashboard. It can run in two modes:
+
+- Local mode: loads the prepared dataset and model directly.
+- API mode: set `PRICING_API_URL` to the FastAPI base URL, such as `http://127.0.0.1:8000`.
+
+## 11. Project Structure
 
 ```text
-data/processed/sales_data.csv -> preprocessing -> demand models -> models/demand_model.pkl
-                                                               |
-                                                               v
-                                                   Streamlit price simulation
+streamlit_app.py               Streamlit dashboard
+model_training.py              Training and evaluation entry point
+README.md                      Project and presentation documentation
+requirements.txt               Runtime, training, and test dependencies
+requirements-dl.txt            Optional TensorFlow dependency
+.env.example                   Configuration template
+backend/                       FastAPI application and services
+src/                           Data preparation, pricing, and optional deep learning code
+data/raw/                     Downloaded M5 files, ignored by Git
+data/processed/               Prepared local data, ignored by Git
+models/                        Model instructions and ignored artifacts
+reports/                       Regenerated EDA and evaluation outputs
+screenshots/                   Optional presentation images
+tests/                         API tests
 ```
 
-Important files: `src/preprocessing.py`, `src/pricing_engine.py`, `src/dl_model.py`, `train_models.py`, and `app.py`.
-
-## Machine Learning
-
-The target is `units_sold`, so this is a regression problem. A mean-demand baseline, Linear Regression, Random Forest, and Gradient Boosting are compared using MAE, RMSE, and R². The final 20% of records by date is held out as the test set to reduce time leakage. Categorical fields use one-hot encoding and numeric fields are standardized in a scikit-learn pipeline. Revenue, profit, and `demand` are not model inputs because they are outcomes or duplicate the target.
-
-## Deep Learning
-
-`src/dl_model.py` contains a small Keras network with Dense, Dropout, and EarlyStopping. Install `requirements-dl.txt` to run it. TensorFlow is intentionally optional because classical models are usually a strong and easier-to-explain baseline for tabular business data; the deployed app does not depend on it.
-
-## Pricing Recommendation Logic
-
-The engine tests 25 prices between a current-price range and a competitor-aware range. For each candidate it predicts demand, caps demand at user-entered inventory, and calculates revenue, profit, and margin. It enforces a minimum price of cost plus 8% and avoids prices more than 20% above the competitor price. The user can maximize revenue, maximize profit, or choose a simple balanced objective. These are expected values, not guarantees.
-
-## How To Run
+## 12. Installation
 
 ```powershell
 python -m pip install -r requirements.txt
-python train_models.py
-streamlit run app.py
 ```
 
-The training command reads the supplied CSV, creates `models/demand_model.pkl`, model metrics, data report, test predictions, feature importance, EDA output, and the optional deep-learning result. Run it again whenever the data or training code changes.
+Place the three M5 files in `data/raw/`, then generate the prepared data and model:
 
-## FastAPI Backend
+```powershell
+python model_training.py
+```
 
-The project also includes a lightweight REST API under `backend/`. Install its pinned serving dependencies with `python -m pip install -r backend/requirements.txt`, then run `python -m uvicorn backend.main:app --reload`. Swagger is available at `http://127.0.0.1:8000/docs`; the versioned health endpoint is `http://127.0.0.1:8000/api/v1/health`. Streamlit calls the API for price recommendations. See [backend/README.md](backend/README.md) for request examples and Render deployment instructions.
+## 13. Running the Project
 
-For a single public user link, deploy `app.py` on Streamlit Community Cloud. When `PRICING_API_URL` is not set, Streamlit uses the saved model and shared pricing engine locally inside the same service. Set `PRICING_API_URL` only when you want the frontend to call a separately deployed FastAPI backend.
+Run the Streamlit application:
 
-## Deployment
+```powershell
+streamlit run streamlit_app.py
+```
 
-Push the project to GitHub, commit the supplied CSV and generated model artifacts, create a Streamlit Community Cloud app, select `app.py`, and let Streamlit install the lightweight `requirements.txt`. TensorFlow is in `requirements-dl.txt` only and is not required for deployment.
+Run FastAPI separately:
 
-## Limitations And Future Work
+```powershell
+python -m uvicorn backend.main:app --reload
+```
 
-Historical data may not represent future behavior. The dataset ends in 2024, competitors can change prices, customer behavior can shift, and predicted demand is uncertain. Future work could add continuously updated POS data, live competitor collection, customer segments, A/B tests, online learning, and more formal forecasting. Reinforcement learning should only be considered after reliable real-world experimentation data exists.
+Open the API documentation at:
 
-## Presentation Structure
+```text
+http://127.0.0.1:8000/docs
+```
 
-For a 5-7 minute presentation: business problem; why pricing is difficult; data and EDA findings; ML demand prediction; optional DL comparison; price simulation demo; metrics and business impact; limitations; future work.
+To use FastAPI from Streamlit, set `PRICING_API_URL=http://127.0.0.1:8000` before starting Streamlit.
 
-Likely technical questions: Why predict demand instead of price? Why avoid leakage? Why compare multiple models? Why can Random Forest outperform Linear Regression? What do MAE and RMSE mean? Why is DL optional? How are categorical fields encoded? How are constraints enforced? How is reproducibility achieved? Why is this not autonomous pricing?
+## 14. Model Evaluation
 
-Likely business questions: What happens when cost rises? How does promotion affect a recommendation? Can this guarantee profit? What if competitor data is stale? Who approves the price? How often should the model be retrained? What if inventory is low? Can the same logic work across categories? What data would improve it? How would you measure business impact? The short answers are: the engine raises the floor; promotion is a demand input; no guarantee; stale data is a limitation; a human reviews it; retrain as data changes; inventory caps demand; category is included; real transaction history helps; and impact should be tested with controlled price experiments.
+The training script writes model comparisons to `models/model_metrics.csv` and test predictions to `reports/test_predictions.csv`.
+
+- **MAE:** average absolute prediction error.
+- **RMSE:** prediction error that penalizes larger errors more heavily.
+- **R²:** the proportion of target variation explained by the model.
+
+The current evaluation is a chronological holdout. Rolling time-series validation would be a useful future improvement.
+
+## 15. Limitations
+
+- M5 is historical and ends in 2016; it does not describe current 2026 Walmart prices.
+- The target is observed units sold, not directly observed unmet demand.
+- Cost, competitor price, inventory, and customer rating are assumptions.
+- Price response is learned from observational historical prices, not a controlled pricing experiment.
+- Recommendations are category-level and do not provide store-specific optimization.
+- A human should review recommendations before using them in a real business.
+
+## 16. Future Improvements
+
+- Integrate live POS and inventory data.
+- Add real competitor prices and product costs.
+- Add product and store identifiers to the demand model.
+- Use rolling time-series validation and controlled price experiments.
+- Add uncertainty intervals and monitoring.
+- Add an optional LLM business assistant for explaining recommendations. No LLM assistant is currently implemented.
+
+## 17. Team Contributions
+
+- Member 1: M5 data preparation and EDA
+- Member 2: feature engineering and ML modeling
+- Member 3: pricing simulation and business logic
+- Member 4: FastAPI backend
+- Member 5: Streamlit interface and deployment
+- Member 6: testing, documentation, and presentation
+
+## GitHub Setup
+
+Do not commit raw M5 CSV files, local model artifacts, secrets, or generated reports. They are covered by `.gitignore`.
+
+```powershell
+git init
+git add .
+git status
+git commit -m "Prepare retail price recommendation project"
+git branch -M main
+git remote add origin https://github.com/<username>/<repository>.git
+git push -u origin main
+```
+
+The commands above initialize and push the repository only when run by the project owner. This assistant does not push anything automatically.

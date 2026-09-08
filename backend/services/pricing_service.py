@@ -7,8 +7,6 @@ OBJECTIVES = {"maximize_revenue": "Maximize revenue", "maximize_profit": "Maximi
 
 
 def simulate(model_service, request):
-    if request.objective.value == "maximize_profit" and request.cost_price is None:
-        raise ValueError("cost_price is required for maximize_profit.")
     result, simulation = recommend_price(
         model_service.model,
         request.product_category,

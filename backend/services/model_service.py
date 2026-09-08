@@ -10,7 +10,7 @@ import joblib
 class ModelService:
     def __init__(self, root: Path) -> None:
         self.root = root
-        self.model_path = root / "models" / "demand_model.pkl"
+        self.model_path = root / "models" / "demand_model.joblib"
         self.model: Any | None = None
         self.metadata: dict[str, Any] = {}
         self.metrics: dict[str, float] = {}

@@ -2,7 +2,6 @@
 
 from datetime import date
 from enum import Enum
-from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
@@ -14,7 +13,7 @@ class PricingObjective(str, Enum):
 
 
 class ScenarioRequest(BaseModel):
-    model_config = ConfigDict(json_schema_extra={"example": {"product_category": "Home", "date": "2024-12-31", "price": 164.36, "cost_price": 86.77, "competitor_price": 149.54, "inventory": 101, "promotion": True, "season": "Winter", "customer_rating": 4.4}})
+    model_config = ConfigDict(json_schema_extra={"example": {"product_category": "HOBBIES", "date": "2016-05-22", "price": 9.58, "cost_price": 6.23, "competitor_price": 9.87, "inventory": 101, "promotion": True, "season": "Spring", "customer_rating": 4.1}})
 
     product_category: str = Field(min_length=1, description="Product category present in the supplied data.")
     date: date
@@ -54,7 +53,7 @@ class Scenario(BaseModel):
 
 
 class Recommendation(BaseModel):
-    price: float
+    recommended_price: float
     predicted_demand: float
     expected_revenue: float
     expected_profit: float | None = None

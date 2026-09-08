@@ -1,6 +1,10 @@
 {
-  "dataset": "data\\processed\\sales_data.csv",
-  "rows": 5000,
+  "dataset": [
+    "sales_train_evaluation.csv",
+    "sell_prices.csv",
+    "calendar.csv"
+  ],
+  "rows": 92720,
   "columns": 15,
   "column_names": [
     "product_id",
@@ -22,7 +26,7 @@
   "data_types": {
     "product_id": "str",
     "product_category": "str",
-    "date": "datetime64[ns]",
+    "date": "datetime64[us]",
     "cost_price": "float64",
     "selling_price": "float64",
     "competitor_price": "float64",
@@ -55,8 +59,8 @@
   },
   "duplicate_rows": 0,
   "date_range": {
-    "start": "2023-01-01 00:00:00",
-    "end": "2024-12-31 00:00:00"
+    "start": "2015-12-23 00:00:00",
+    "end": "2016-05-22 00:00:00"
   },
   "numeric_columns": [
     "cost_price",
@@ -78,10 +82,20 @@
     "day_of_week"
   ],
   "target": "units_sold",
-  "real_pricing_fields": [
+  "source_fields": [
+    "product_category",
+    "date",
     "selling_price",
+    "units_sold",
+    "promotion",
+    "season",
+    "day_of_week"
+  ],
+  "derived_assumption_fields": [
     "cost_price",
     "competitor_price",
+    "inventory",
+    "customer_rating",
     "revenue",
     "profit"
   ]

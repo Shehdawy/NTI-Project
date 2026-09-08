@@ -1,23 +1,17 @@
 {
-  "best_model": "Gradient Boosting",
-  "rows": 5000,
+  "best_model": "Random Forest",
+  "rows": 92720,
   "features": [
     "product_category",
-    "cost_price",
     "selling_price",
-    "competitor_price",
-    "inventory",
     "promotion",
     "season",
     "day_of_week",
-    "customer_rating",
     "month",
-    "weekend",
-    "promotion_flag",
-    "price_difference_from_competitor",
-    "price_ratio_to_competitor"
+    "weekend"
   ],
-  "data_start": "2023-01-01 00:00:00",
-  "data_end": "2024-12-31 00:00:00",
-  "split": "chronological 80/20"
+  "data_start": "2015-12-23 00:00:00",
+  "data_end": "2016-05-22 00:00:00",
+  "split": "chronological 80/20 by date",
+  "split_date": "2016-04-22 00:00:00"
 }

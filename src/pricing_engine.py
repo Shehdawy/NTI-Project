@@ -27,7 +27,9 @@ def recommend_price(
     if cost_price is not None:
         lower = max(cost_price * 1.08, lower)
     upper = min(competitor_price * 1.20, current_price * 1.20)
-    candidates = np.unique(np.round(np.linspace(lower, max(lower, upper), 25), 2))
+    if lower > upper:
+        raise ValueError("No feasible candidate price satisfies the cost, current-price, and competitor constraints.")
+    candidates = np.unique(np.round(np.linspace(lower, upper, 25), 2))
     rows = []
     for price in candidates:
         input_frame = pd.DataFrame([{
@@ -50,9 +52,16 @@ def recommend_price(
         demand = min(demand, float(inventory))
         revenue = demand * price
         profit = demand * (price - cost_price) if cost_price is not None else None
-        balanced_score = revenue if profit is None else revenue * 0.5 + profit * 0.5
-        rows.append({"candidate_price": price, "predicted_demand": demand, "expected_revenue": revenue, "expected_profit": profit, "profit_margin": profit / revenue if revenue else 0, "balanced_score": balanced_score})
+        rows.append({"candidate_price": price, "predicted_demand": demand, "expected_revenue": revenue, "expected_profit": profit, "profit_margin": profit / revenue if profit is not None and revenue else None})
     simulation = pd.DataFrame(rows)
+    if simulation["expected_profit"].notna().any():
+        revenue_range = simulation["expected_revenue"].max() - simulation["expected_revenue"].min()
+        profit_range = simulation["expected_profit"].max() - simulation["expected_profit"].min()
+        revenue_score = (simulation["expected_revenue"] - simulation["expected_revenue"].min()) / revenue_range if revenue_range else 0.5
+        profit_score = (simulation["expected_profit"] - simulation["expected_profit"].min()) / profit_range if profit_range else 0.5
+        simulation["balanced_score"] = (revenue_score + profit_score) * 0.5
+    else:
+        simulation["balanced_score"] = simulation["expected_revenue"]
     objective_columns = {"Maximize revenue": "expected_revenue", "Maximize profit": "expected_profit", "Balanced": "balanced_score"}
     if objective not in objective_columns:
         raise ValueError("Choose a supported recommendation objective.")

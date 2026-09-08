@@ -73,10 +73,10 @@ def recommend(request: RecommendationRequest):
         raise HTTPException(status_code=422, detail={"code": "INVALID_REQUEST", "message": str(error)}) from error
     scenarios = [Scenario(price=float(row.candidate_price), predicted_demand=float(row.predicted_demand), expected_revenue=float(row.expected_revenue), expected_profit=float(row.expected_profit) if row.expected_profit == row.expected_profit else None) for row in simulation.itertuples()]
     return RecommendationResponse(
-        recommendation=Recommendation(price=result["recommended_price"], predicted_demand=result["predicted_demand"], expected_revenue=result["expected_revenue"], expected_profit=result["expected_profit"], profit_margin=result["profit_margin"]),
+        recommendation=Recommendation(recommended_price=result["recommended_price"], predicted_demand=result["predicted_demand"], expected_revenue=result["expected_revenue"], expected_profit=result["expected_profit"], profit_margin=result["profit_margin"]),
         current_price=request.current_price,
         objective=request.objective,
         scenarios=scenarios,
         user_provided_assumption=True,
-        explanation=["The recommended price produced the best expected outcome among the tested scenarios.", "Demand is predicted using the saved Gradient Boosting demand model.", "Cost, competitor price, and inventory are request inputs for this scenario; they are not inferred from the API request."],
+        explanation=["The recommended price produced the best expected outcome among the tested scenarios.", f"Demand is predicted using the saved {MODEL_SERVICE.metadata.get('best_model', 'demand')} model.", "Cost, competitor price, and inventory are request inputs for this scenario; they are not inferred from the API request."],
     )

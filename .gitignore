@@ -1,7 +1,29 @@
 __pycache__/
 *.py[cod]
 .venv/
+venv/
+env/
+.env
+.vscode/
 .pytest_cache/
 .ipynb_checkpoints/
-data/raw/*
-reports/*.png
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.bak
+
+# M5 source data and prepared local data
+data/*.csv
+data/**/*.csv
+data/*.zip
+
+# Generated model and evaluation artifacts
+models/*.pkl
+models/*.joblib
+models/*.keras
+models/*.csv
+models/*.json
+reports/*
+screenshots/*
+!screenshots/README.md
