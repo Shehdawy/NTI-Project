@@ -61,7 +61,7 @@ The final holdout is chronological and split at a date boundary so records from 
 
 ## 6. Deep Learning
 
-`src/deep_learning_model.py` contains an optional small Keras network for comparison. TensorFlow is not required by the deployed application. When installed through `requirements-dl.txt`, the training script can create an optional Keras artifact and comparison result.
+`src/deep_learning_model.py` contains an optional small Keras network for comparison. TensorFlow is not required by the deployed application.
 
 ## 7. Pricing Simulation
 
@@ -110,16 +110,12 @@ Interactive API documentation is available at `/docs` when FastAPI is running.
 streamlit_app.py               Streamlit dashboard
 model_training.py              Training and evaluation entry point
 README.md                      Project and presentation documentation
-requirements.txt               Runtime, training, and test dependencies
-requirements-dl.txt            Optional TensorFlow dependency
-.env.example                   Configuration template
 backend/                       FastAPI application and services
 src/                           Data preparation, pricing, and optional deep learning code
 data/raw/                     Downloaded M5 files, ignored by Git
 data/processed/               Prepared local data, ignored by Git
 models/                        Model instructions and ignored artifacts
 reports/                       Regenerated EDA and evaluation outputs
-screenshots/                   Optional presentation images
 tests/                         API tests
 ```
 
@@ -185,27 +181,5 @@ The current evaluation is a chronological holdout. Rolling time-series validatio
 - Add uncertainty intervals and monitoring.
 - Add an optional LLM business assistant for explaining recommendations. No LLM assistant is currently implemented.
 
-## 17. Team Contributions
 
-- Member 1: M5 data preparation and EDA
-- Member 2: feature engineering and ML modeling
-- Member 3: pricing simulation and business logic
-- Member 4: FastAPI backend
-- Member 5: Streamlit interface and deployment
-- Member 6: testing, documentation, and presentation
-
-## GitHub Setup
-
-Do not commit raw M5 CSV files, local model artifacts, secrets, or generated reports. They are covered by `.gitignore`.
-
-```powershell
-git init
-git add .
-git status
-git commit -m "Prepare retail price recommendation project"
-git branch -M main
-git remote add origin https://github.com/<username>/<repository>.git
-git push -u origin main
-```
-
-The commands above initialize and push the repository only when run by the project owner. This assistant does not push anything automatically.
+ize and push the repository only when run by the project owner. This assistant does not push anything automatically.
