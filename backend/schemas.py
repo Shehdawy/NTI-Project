@@ -7,13 +7,30 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class PricingObjective(str, Enum):
+    """The business goal used to pick a single price out of the simulated candidates."""
+
     REVENUE = "maximize_revenue"
     PROFIT = "maximize_profit"
     BALANCED = "balanced"
 
 
+EXAMPLE_SCENARIO = {
+    "product_category": "HOBBIES",
+    "date": "2016-05-22",
+    "price": 9.58,
+    "cost_price": 6.23,
+    "competitor_price": 9.87,
+    "inventory": 101,
+    "promotion": True,
+    "season": "Spring",
+    "customer_rating": 4.1,
+}
+
+
 class ScenarioRequest(BaseModel):
-    model_config = ConfigDict(json_schema_extra={"example": {"product_category": "HOBBIES", "date": "2016-05-22", "price": 9.58, "cost_price": 6.23, "competitor_price": 9.87, "inventory": 101, "promotion": True, "season": "Spring", "customer_rating": 4.1}})
+    """Fields shared by both the demand and pricing endpoints."""
+
+    model_config = ConfigDict(json_schema_extra={"example": EXAMPLE_SCENARIO})
 
     product_category: str = Field(min_length=1, description="Product category present in the supplied data.")
     date: date
@@ -31,10 +48,14 @@ class ScenarioRequest(BaseModel):
 
 
 class DemandRequest(ScenarioRequest):
+    """Request body for POST /api/v1/predict-demand: a single price to evaluate."""
+
     price: float = Field(gt=0)
 
 
 class RecommendationRequest(ScenarioRequest):
+    """Request body for POST /api/v1/recommend-price: a price range to search."""
+
     current_price: float = Field(gt=0, description="Current selling price used as the simulation center.")
     objective: PricingObjective = PricingObjective.REVENUE
 
@@ -46,6 +67,8 @@ class DemandResponse(BaseModel):
 
 
 class Scenario(BaseModel):
+    """One tested candidate price and its predicted outcome."""
+
     price: float
     predicted_demand: float
     expected_revenue: float
@@ -53,6 +76,8 @@ class Scenario(BaseModel):
 
 
 class Recommendation(BaseModel):
+    """The single candidate price selected as the recommendation."""
+
     recommended_price: float
     predicted_demand: float
     expected_revenue: float

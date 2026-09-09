@@ -104,6 +104,14 @@ Interactive API documentation is available at `/docs` when FastAPI is running.
 - Local mode: loads the prepared dataset and model directly.
 - API mode: set `PRICING_API_URL` to the FastAPI base URL, such as `http://127.0.0.1:8000`.
 
+Each recommendation is shown alongside a short plain-language explanation from the **PricePilot Assistant** (see below), plus an expandable view of every candidate price that was tested and a summary of the underlying model's backtested accuracy.
+
+## 10a. PricePilot Assistant
+
+`src/assistant.py` turns a recommendation's numbers into a short, plain-language explanation — e.g. how the recommended price compares to the current price and the competitor, whether the objective was revenue, profit, or a balance of both, and whether the resulting margin looks healthy.
+
+This is **not** a call to an external LLM. It's a small, deterministic, template-based generator: same inputs always produce the same explanation, no API key or network access is required, and it costs nothing to run. It's used both in the Streamlit dashboard and in the FastAPI `explanation` field of `POST /api/v1/recommend-price`.
+
 ## 11. Project Structure
 
 ```text
@@ -111,12 +119,12 @@ streamlit_app.py               Streamlit dashboard
 model_training.py              Training and evaluation entry point
 README.md                      Project and presentation documentation
 backend/                       FastAPI application and services
-src/                           Data preparation, pricing, and optional deep learning code
-data/raw/                     Downloaded M5 files, ignored by Git
-data/processed/               Prepared local data, ignored by Git
-models/                        Model instructions and ignored artifacts
+src/                           Data preparation, pricing engine, assistant, and optional deep learning code
+data/raw/                     Downloaded M5 files (large; not committed)
+data/processed/               Prepared dataset, committed for deployment (see data/README.md)
+models/                        Model artifacts; the trained model is committed for deployment (see models/README.md)
 reports/                       Regenerated EDA and evaluation outputs
-tests/                         API tests
+tests/                         API and assistant tests
 ```
 
 ## 12. Installation
@@ -179,7 +187,4 @@ The current evaluation is a chronological holdout. Rolling time-series validatio
 - Add product and store identifiers to the demand model.
 - Use rolling time-series validation and controlled price experiments.
 - Add uncertainty intervals and monitoring.
-- Add an optional LLM business assistant for explaining recommendations. No LLM assistant is currently implemented.
-
-
-ize and push the repository only when run by the project owner. This assistant does not push anything automatically.
+- Optionally swap the rule-based PricePilot Assistant (section 10a) for an LLM-backed one for more open-ended, free-form questions.

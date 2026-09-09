@@ -1,10 +1,21 @@
-"""Optional small Keras comparison model."""
+"""Optional small Keras comparison model.
+
+This is intentionally optional: the deployed app never depends on it, and
+the project is explicit (in the README and in the JSON this function
+returns) about whether it actually ran. If TensorFlow isn't installed, this
+returns a "skipped" status rather than pretending a model was trained.
+"""
 
 from pathlib import Path
 
 
 def train_deep_learning(X_train, y_train, X_test, y_test, output_path: Path) -> dict:
-    """Train Keras when installed; return a clear status otherwise."""
+    """Train a small feed-forward network when TensorFlow is installed.
+
+    Returns a dict with either ``{"status": "skipped", "reason": ...}`` or
+    ``{"status": "trained", "mae": ..., "rmse": ...}`` -- callers should
+    check ``status`` rather than assuming metrics are present.
+    """
     try:
         import tensorflow as tf
     except ImportError:

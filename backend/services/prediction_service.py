@@ -1,9 +1,15 @@
-"""Demand feature preparation shared by API prediction and pricing calls."""
+"""Demand feature preparation shared by the API's prediction and pricing calls."""
 
 import pandas as pd
 
 
 def build_input(request, price: float | None = None) -> pd.DataFrame:
+    """Turn one API request into the single-row feature frame the model expects.
+
+    ``price`` lets callers override the request's own price -- used by the
+    pricing engine, which needs to ask "what if the price were X?" for many
+    candidate prices without constructing a new request object each time.
+    """
     decision_date = pd.Timestamp(request.date)
     selling_price = request.price if price is None else price
     return pd.DataFrame([{
@@ -25,4 +31,5 @@ def build_input(request, price: float | None = None) -> pd.DataFrame:
 
 
 def predict_demand(model_service, request) -> float:
+    """Predict demand for one request, clipped to be non-negative."""
     return max(0.0, float(model_service.predict(build_input(request))[0]))
