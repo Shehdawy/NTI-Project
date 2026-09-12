@@ -1,4 +1,0 @@
-{
-  "status": "skipped",
-  "reason": "TensorFlow is not installed. Install tensorflow-cpu to run the optional experiment."
-}
